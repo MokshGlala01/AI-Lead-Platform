@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { signIn } from '@/lib/auth';
 import { supabase } from '@/lib/supabase';
-import { GraduationCap, Loader2, AlertTriangle } from 'lucide-react';
+import { School, Loader2, AlertTriangle } from 'lucide-react';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -68,11 +68,11 @@ export default function LoginPage() {
       {/* Brand logo overlay */}
       <div className="flex items-center gap-3 mb-8 select-none">
         <div className="p-2.5 bg-brand-primary rounded-xl text-white shadow-xl shadow-brand-primary/20">
-          <GraduationCap className="w-6 h-6" />
+          <School className="w-6 h-6" />
         </div>
         <div className="flex flex-col">
           <span className="font-extrabold text-xl text-brand-white tracking-tight leading-none font-heading">
-            EFOS
+            CampusFlow
           </span>
           <span className="text-[10px] font-extrabold uppercase tracking-widest text-slate-500 mt-1">
             Console SaaS
@@ -111,7 +111,7 @@ export default function LoginPage() {
                 setEmail(e.target.value);
                 if (errorMsg) setErrorMsg('');
               }}
-              placeholder="e.g. coordinator@efos.edu"
+              placeholder="e.g. coordinator@campusflow.edu"
               className="px-4 py-3 bg-slate-950 border border-slate-800 text-sm rounded-xl focus:outline-none focus:border-brand-primary transition-all text-brand-white placeholder:text-slate-655"
             />
           </div>

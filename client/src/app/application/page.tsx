@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import LeadForm from '@/components/LeadForm';
 import ThreeDHeroCanvas from '@/components/3d/ThreeDHeroCanvas';
-import { GraduationCap, Loader2, LogOut } from 'lucide-react';
+import { School, Loader2, LogOut } from 'lucide-react';
 import { signOut } from '@/lib/auth';
 
 export default function ApplicationPage() {
@@ -57,10 +57,10 @@ export default function ApplicationPage() {
       <header className="h-16 bg-[#050816]/75 border-b border-slate-800/60 px-6 flex items-center justify-between sticky top-0 z-50 backdrop-blur-md select-none">
         <div className="flex items-center gap-2.5">
           <div className="p-2 bg-brand-primary rounded-xl text-white shadow-lg shadow-brand-primary/20">
-            <GraduationCap className="w-5 h-5" />
+            <School className="w-5 h-5" />
           </div>
           <span className="font-extrabold text-base text-brand-white tracking-tight leading-none font-heading">
-            EFOS Admissions
+            CampusFlow Admissions
           </span>
         </div>
         <button

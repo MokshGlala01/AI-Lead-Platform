@@ -91,7 +91,7 @@ const Sidebar: React.FC = () => {
       {/* Footer Branding */}
       <div className="border-t border-slate-800/80 pt-4 text-center select-none">
         <span className="text-[9px] font-extrabold text-slate-600 uppercase tracking-widest block">
-          EFOS SaaS Platform
+          CampusFlow Platform
         </span>
         <span className="text-[8px] font-extrabold text-slate-700 uppercase tracking-widest block mt-0.5">
           v1.0.0 — Enterprise

@@ -2,7 +2,7 @@ import './globals.css';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'EFOS — AI-Powered Student Qualification & Enrollment Platform',
+  title: 'CampusFlow — AI-Powered Student Qualification & Enrollment Platform',
   description: 'Automate lead collection, run AI qualification, generate personalized copy, and balance counselors round-robin.',
 };
 

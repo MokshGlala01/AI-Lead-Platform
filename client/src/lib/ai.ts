@@ -11,25 +11,25 @@ export async function generateMessage(lead: AILead, channel: string): Promise<st
 
   let prompt = '';
   if (channel === 'whatsapp') {
-    prompt = `You are an admission counselor at EFOS Education.
+    prompt = `You are an admission counselor at CampusFlow.
 Write a warm, personal WhatsApp message for a student.
 Student Name: ${lead.name}
 City: ${lead.city || 'your city'}
 Interested in: ${lead.courseInterest || 'our programs'}
 Qualification: ${lead.qualification || 'your education'}
-EFOS offers: 100% placement assistance, industry mentors, practical projects, certifications.
+CampusFlow offers: 100% placement assistance, industry mentors, practical projects, certifications.
 Rules: Under 80 words. Friendly tone. 1-2 emojis max. End with one clear call-to-action.
 Do not use generic language or placeholders. Make it feel like a real counselor wrote it.`;
   } else if (channel === 'email') {
-    prompt = `You are an admission counselor at EFOS Education.
-Write a professional email for EFOS admissions to the student.
+    prompt = `You are an admission counselor at CampusFlow.
+Write a professional email for CampusFlow admissions to the student.
 Student Name: ${lead.name}
 City: ${lead.city || 'your city'}
 Interested in: ${lead.courseInterest || 'our programs'}
 Qualification: ${lead.qualification || 'your education'}
-EFOS offers: 100% placement assistance, industry mentors, practical projects, certifications.
+CampusFlow offers: 100% placement assistance, industry mentors, practical projects, certifications.
 Output format — first line: 'Subject: [subject line here]', then a blank line, then the email body.
-Max 150 words. Warm but professional. Highlight 2 EFOS benefits relevant to their course.`;
+Max 150 words. Warm but professional. Highlight 2 CampusFlow benefits relevant to their course.`;
   } else if (channel === 'sms') {
     prompt = `Write an SMS message. Max 50 words. Very concise.
 Student Name: ${lead.name}
@@ -40,9 +40,9 @@ Start with the student's first name. End with: 'Reply YES to know more.'`;
   }
 
   const fallbacks: Record<string, string> = {
-    whatsapp: `Hi ${lead.name}! I noticed you're interested in our ${lead.courseInterest || 'programs'} at EFOS. We offer 100% placement assistance, industry mentors, and hands-on projects to get you career-ready. When is a good time to connect for a quick 5-minute guidance call?`,
-    email: `Subject: Career Opportunities in ${lead.courseInterest || 'Education'} with EFOS\n\nDear ${lead.name},\n\nThank you for your interest in EFOS Education. We noticed you are looking to enroll in our ${lead.courseInterest || 'advanced'} program.\n\nAt EFOS, we provide industry-recognized certifications and 100% placement assistance to set you up for success. We would love to discuss how we can help you achieve your career goals.\n\nReply to this email or let us know if you're available for a phone call this week.\n\nWarm regards,\nAdmissions Team\nEFOS Education`,
-    sms: `Hi ${lead.name}, thanks for your interest in EFOS ${lead.courseInterest || 'courses'}. Get 100% placement assistance & hands-on training. Reply YES to know more.`
+    whatsapp: `Hi ${lead.name}! I noticed you're interested in our ${lead.courseInterest || 'programs'} at CampusFlow. We offer 100% placement assistance, industry mentors, and hands-on projects to get you career-ready. When is a good time to connect for a quick 5-minute guidance call?`,
+    email: `Subject: Career Opportunities in ${lead.courseInterest || 'Education'} with CampusFlow\n\nDear ${lead.name},\n\nThank you for your interest in CampusFlow. We noticed you are looking to enroll in our ${lead.courseInterest || 'advanced'} program.\n\nAt CampusFlow, we provide industry-recognized certifications and 100% placement assistance to set you up for success. We would love to discuss how we can help you achieve your career goals.\n\nReply to this email or let us know if you're available for a phone call this week.\n\nWarm regards,\nAdmissions Team\nCampusFlow`,
+    sms: `Hi ${lead.name}, thanks for your interest in CampusFlow ${lead.courseInterest || 'courses'}. Get 100% placement assistance & hands-on training. Reply YES to know more.`
   };
 
   if (!apiKey || apiKey.includes('your-openrouter-key')) {

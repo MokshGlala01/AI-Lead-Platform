@@ -3,7 +3,7 @@
 // Top Navbar header with branding logos, keyboard shortcut indications, alerts bell, and modal popups
 import React from 'react';
 import Link from 'next/link';
-import { GraduationCap, Bell, Plus, Search, LogOut } from 'lucide-react';
+import { School, Bell, Plus, Search, LogOut } from 'lucide-react';
 import { signOut } from '@/lib/auth';
 
 interface NavbarProps {
@@ -17,11 +17,11 @@ const Navbar: React.FC<NavbarProps> = ({ onAddLeadClick, hotCount = 0 }) => {
       {/* Brand Logo */}
       <Link href="/admin" className="flex items-center gap-2.5 group">
         <div className="p-2 bg-brand-primary rounded-xl text-white shadow-lg shadow-brand-primary/20 group-hover:scale-105 transition-transform">
-          <GraduationCap className="w-5 h-5" />
+          <School className="w-5 h-5" />
         </div>
         <div className="flex flex-col">
           <span className="font-extrabold text-base text-brand-white tracking-tight leading-none font-heading">
-            EFOS
+            CampusFlow
           </span>
           <span className="text-[9px] font-extrabold uppercase tracking-widest text-slate-500 mt-1">
             Console SaaS

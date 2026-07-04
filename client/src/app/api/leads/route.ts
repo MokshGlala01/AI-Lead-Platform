@@ -212,7 +212,7 @@ export async function POST(req: NextRequest) {
           qualification
         }, 'email');
 
-        let subject = 'Welcome to EFOS Education!';
+        let subject = 'Welcome to CampusFlow!';
         let body = emailDraft;
 
         if (emailDraft.startsWith('Subject:')) {

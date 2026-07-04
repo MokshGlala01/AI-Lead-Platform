@@ -7,7 +7,7 @@ import { signOut } from '@/lib/auth';
 import ThreeDHeroCanvas from '@/components/3d/ThreeDHeroCanvas';
 import ScoreBadge from '@/components/ui/ScoreBadge';
 import StatusBadge from '@/components/ui/StatusBadge';
-import { GraduationCap, LogOut, Loader2, Sparkles, User, Mail, Calendar, Phone, Clock, FileText, CheckCircle2 } from 'lucide-react';
+import { School, LogOut, Loader2, Sparkles, User, Mail, Calendar, Phone, Clock, FileText, CheckCircle2 } from 'lucide-react';
 
 export default function StudentDashboard() {
   const router = useRouter();
@@ -166,11 +166,11 @@ export default function StudentDashboard() {
       <header className="h-16 bg-[#050816]/75 border-b border-slate-800/60 px-6 flex items-center justify-between sticky top-0 z-50 backdrop-blur-md select-none">
         <div className="flex items-center gap-2.5">
           <div className="p-2 bg-brand-primary rounded-xl text-white shadow-lg shadow-brand-primary/20">
-            <GraduationCap className="w-5 h-5" />
+            <School className="w-5 h-5" />
           </div>
           <div className="flex flex-col">
             <span className="font-extrabold text-sm text-brand-white tracking-tight leading-none font-heading">
-              EFOS
+              CampusFlow
             </span>
             <span className="text-[8px] font-extrabold uppercase tracking-widest text-slate-550 mt-1">
               Student Dashboard
@@ -302,7 +302,7 @@ export default function StudentDashboard() {
                   </div>
                   <div className="flex flex-col">
                     <span className="text-xs font-bold text-brand-white">{student.counselors.name}</span>
-                    <span className="text-[9px] text-slate-500 font-bold uppercase tracking-wider">EFOS Coordinator</span>
+                    <span className="text-[9px] text-slate-500 font-bold uppercase tracking-wider">CampusFlow Coordinator</span>
                   </div>
                 </div>
 

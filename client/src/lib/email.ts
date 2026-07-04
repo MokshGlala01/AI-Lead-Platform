@@ -33,7 +33,7 @@ export async function sendEmail({
     });
 
     const info = await transporter.sendMail({
-      from: `"EFOS Admissions" <${user}>`,
+      from: `"CampusFlow Admissions" <${user}>`,
       to,
       subject,
       text,

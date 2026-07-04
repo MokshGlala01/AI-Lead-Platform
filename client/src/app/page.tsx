@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import ThreeDHeroCanvas from '../components/3d/ThreeDHeroCanvas';
 import { supabase } from '../lib/supabase';
-import { Target, Users, Code, Award, GraduationCap, ArrowRight, Zap, Shield, Sparkles, Loader2 } from 'lucide-react';
+import { Target, Users, Code, Award, School, ArrowRight, Zap, Shield, Sparkles, Loader2 } from 'lucide-react';
 
 const LandingPage: React.FC = () => {
   const router = useRouter();
@@ -67,10 +67,10 @@ const LandingPage: React.FC = () => {
       <header className="h-16 bg-[#050816]/75 border-b border-slate-800/60 px-6 flex items-center justify-between sticky top-0 z-50 backdrop-blur-md select-none">
         <div className="flex items-center gap-2.5">
           <div className="p-2 bg-brand-primary rounded-xl text-white shadow-lg shadow-brand-primary/20">
-            <GraduationCap className="w-5 h-5" />
+            <School className="w-5 h-5" />
           </div>
           <span className="font-extrabold text-base text-brand-white tracking-tight leading-none font-heading">
-            EFOS Education
+            CampusFlow
           </span>
         </div>
         <div className="flex items-center gap-4">
@@ -225,7 +225,7 @@ const LandingPage: React.FC = () => {
 
       {/* Footer marquee panel */}
       <footer className="bg-slate-950/80 border-t border-slate-900/60 py-8 px-6 text-center text-[10px] font-bold text-slate-500 tracking-widest uppercase relative z-10 select-none">
-        © 2026 EFOS Inc. All Rights Reserved. Dark SaaS Edition v1.0.0
+        © 2026 CampusFlow Inc. All Rights Reserved. Dark SaaS Edition v1.0.0
       </footer>
     </div>
   );
