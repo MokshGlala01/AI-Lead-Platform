@@ -124,7 +124,7 @@ const LeadDetail: React.FC<LeadDetailProps> = ({
     setGeneratedContent('');
     setSentStatus('');
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || '';
+      const apiUrl = typeof window !== 'undefined' ? '' : (process.env.NEXT_PUBLIC_API_URL || '');
       const response = await axios.post(apiUrl + '/api/messages/generate', {
         lead_id: lead.id,
         channel: activeTab

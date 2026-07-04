@@ -81,7 +81,7 @@ const DashboardContent: React.FC = () => {
   const fetchLeads = async () => {
     setLoading(true);
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || '';
+      const apiUrl = typeof window !== 'undefined' ? '' : (process.env.NEXT_PUBLIC_API_URL || '');
       const params = {
         search: debouncedSearch,
         status: statusFilter || undefined,
@@ -108,7 +108,7 @@ const DashboardContent: React.FC = () => {
   // Fetch metrics API
   const fetchSummaryStats = async () => {
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || '';
+      const apiUrl = typeof window !== 'undefined' ? '' : (process.env.NEXT_PUBLIC_API_URL || '');
       const response = await axios.get(apiUrl + '/api/analytics/summary');
       setStats({
         total: response.data.total || 0,
@@ -164,7 +164,7 @@ const DashboardContent: React.FC = () => {
 
   const handleStatusChange = async (leadId: string, newStatus: string) => {
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || '';
+      const apiUrl = typeof window !== 'undefined' ? '' : (process.env.NEXT_PUBLIC_API_URL || '');
       await axios.patch(apiUrl + '/api/leads/' + leadId + '/status', { status: newStatus });
       fetchLeads();
       fetchSummaryStats();

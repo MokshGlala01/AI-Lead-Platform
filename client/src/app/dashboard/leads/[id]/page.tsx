@@ -48,7 +48,7 @@ const LeadDetailPageContent: React.FC = () => {
       setLoading(true);
       setError('');
       
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || '';
+      const apiUrl = typeof window !== 'undefined' ? '' : (process.env.NEXT_PUBLIC_API_URL || '');
       const leadRes = await axios.get(apiUrl + '/api/leads/' + id);
       setLead(leadRes.data);
 
@@ -68,7 +68,7 @@ const LeadDetailPageContent: React.FC = () => {
 
   const handleStatusChange = async (newStatus: string) => {
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || '';
+      const apiUrl = typeof window !== 'undefined' ? '' : (process.env.NEXT_PUBLIC_API_URL || '');
       const res = await axios.patch(apiUrl + '/api/leads/' + id + '/status', { status: newStatus });
       setLead((prev: any) => ({ ...prev, status: res.data.status }));
     } catch (err) {
@@ -78,7 +78,7 @@ const LeadDetailPageContent: React.FC = () => {
 
   const handleNotesSave = async (newNotes: string) => {
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || '';
+      const apiUrl = typeof window !== 'undefined' ? '' : (process.env.NEXT_PUBLIC_API_URL || '');
       const res = await axios.patch(apiUrl + '/api/leads/' + id + '/notes', { notes: newNotes });
       setLead((prev: any) => ({ ...prev, notes: res.data.notes }));
     } catch (err) {
@@ -90,7 +90,7 @@ const LeadDetailPageContent: React.FC = () => {
   const handleAssignCounselor = async (counselorId: string) => {
     setAssigning(true);
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || '';
+      const apiUrl = typeof window !== 'undefined' ? '' : (process.env.NEXT_PUBLIC_API_URL || '');
       await axios.post(apiUrl + '/api/counselors/' + counselorId + '/assign/' + id);
       // Refresh lead profiles
       const leadRes = await axios.get(apiUrl + '/api/leads/' + id);
@@ -105,7 +105,7 @@ const LeadDetailPageContent: React.FC = () => {
   const handleRescore = async () => {
     setRescoring(true);
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || '';
+      const apiUrl = typeof window !== 'undefined' ? '' : (process.env.NEXT_PUBLIC_API_URL || '');
       await axios.post(apiUrl + '/api/leads/' + id + '/rescore');
       // Reload full data
       const leadRes = await axios.get(apiUrl + '/api/leads/' + id);
@@ -121,7 +121,7 @@ const LeadDetailPageContent: React.FC = () => {
   const handleDelete = async () => {
     if (!window.confirm('Are you sure you want to delete this lead? This action cannot be undone.')) return;
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || '';
+      const apiUrl = typeof window !== 'undefined' ? '' : (process.env.NEXT_PUBLIC_API_URL || '');
       await axios.delete(apiUrl + '/api/leads/' + id);
       router.push('/dashboard');
     } catch (err) {

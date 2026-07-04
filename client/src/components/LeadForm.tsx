@@ -58,7 +58,7 @@ const LeadForm: React.FC<LeadFormProps> = ({ onSubmitSuccess, isModal = false, o
 
     setLoading(true);
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || '';
+      const apiUrl = typeof window !== 'undefined' ? '' : (process.env.NEXT_PUBLIC_API_URL || '');
       const response = await axios.post(`${apiUrl}/api/leads`, {
         ...formData,
         phone: cleanPhone

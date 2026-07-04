@@ -51,7 +51,7 @@ const AnalyticsPage: React.FC = () => {
   const fetchAnalyticsData = async () => {
     try {
       setLoading(true);
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || '';
+      const apiUrl = typeof window !== 'undefined' ? '' : (process.env.NEXT_PUBLIC_API_URL || '');
       const [summaryRes, dailyRes] = await Promise.all([
         axios.get(apiUrl + '/api/analytics/summary'),
         axios.get(apiUrl + '/api/analytics/daily')

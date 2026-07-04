@@ -57,7 +57,7 @@ const CommandPalette: React.FC = () => {
     const delayDebounce = setTimeout(async () => {
       setSearching(true);
       try {
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL || '';
+        const apiUrl = typeof window !== 'undefined' ? '' : (process.env.NEXT_PUBLIC_API_URL || '');
         const res = await axios.get(apiUrl + '/api/leads', {
           params: { search: query, limit: 5 }
         });
