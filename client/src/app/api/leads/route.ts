@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
 import { calculateScore } from '@/lib/scoring';
 import { assignCounselor } from '@/lib/assignment';
+import { generateMessage } from '@/lib/ai';
+import { sendEmail } from '@/lib/email';
 
 export function mapLeadKeys(lead: any) {
   if (!lead) return null;
@@ -197,6 +199,47 @@ export async function POST(req: NextRequest) {
           .eq('id', leadRecord.id)
           .single();
         if (updatedRecord) finalLead = updatedRecord;
+      }
+    }
+
+    // Generate AI-personalized outreach email and send it via SMTP
+    if (email) {
+      try {
+        const emailDraft = await generateMessage({
+          name,
+          city,
+          courseInterest: course_interest,
+          qualification
+        }, 'email');
+
+        let subject = 'Welcome to EFOS Education!';
+        let body = emailDraft;
+
+        if (emailDraft.startsWith('Subject:')) {
+          const lines = emailDraft.split('\n');
+          subject = lines[0].replace('Subject:', '').trim();
+          body = lines.slice(1).join('\n').trim();
+        }
+
+        const emailSent = await sendEmail({
+          to: email,
+          subject,
+          text: body,
+          html: body.replace(/\n/g, '<br />')
+        });
+
+        if (emailSent) {
+          // Log email outreach activity in database
+          await supabaseAdmin
+            .from('lead_activity')
+            .insert({
+              lead_id: leadRecord.id,
+              activity_type: 'outreach',
+              description: `Personalized email automatically drafted by AI and sent to ${email}. Subject: "${subject}"`
+            });
+        }
+      } catch (err: any) {
+        console.error('Failed to run native email automation:', err.message || err);
       }
     }
 
