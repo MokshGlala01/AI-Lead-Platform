@@ -20,8 +20,8 @@ export default function ApplicationPage() {
       } else {
         setEmail(session.user.email || '');
         // Check if they already have an application
-        supabase.from('leads').select('id').eq('email', session.user.email).maybeSingle().then(({ data }) => {
-          if (data) {
+        supabase.from('leads').select('id').eq('email', session.user.email).limit(1).then(({ data }) => {
+          if (data && data.length > 0) {
             router.replace('/dashboard');
           } else {
             setLoading(false);

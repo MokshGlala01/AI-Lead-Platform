@@ -41,7 +41,8 @@ const LandingPage: React.FC = () => {
       }
 
       // Check if they already have an application
-      const { data: lead } = await supabase.from('leads').select('id').eq('email', session.user.email).maybeSingle();
+      const { data: leads } = await supabase.from('leads').select('id').eq('email', session.user.email).limit(1);
+      const lead = leads && leads.length > 0 ? leads[0] : null;
       if (lead) {
         router.push('/dashboard');
       } else {
@@ -83,7 +84,8 @@ const LandingPage: React.FC = () => {
                   if (counselor) {
                     router.push('/admin');
                   } else {
-                    const { data: lead } = await supabase.from('leads').select('id').eq('email', session.user.email).maybeSingle();
+                    const { data: leads } = await supabase.from('leads').select('id').eq('email', session.user.email).limit(1);
+                    const lead = leads && leads.length > 0 ? leads[0] : null;
                     if (lead) {
                       router.push('/dashboard');
                     } else {

@@ -35,15 +35,18 @@ export default function StudentDashboard() {
   const fetchStudentData = async (email: string) => {
     try {
       setStatusText('Retrieving lead profile...');
-      const { data: lead, error: leadError } = await supabase
+      const { data: leads, error: leadError } = await supabase
         .from('leads')
         .select('*')
         .eq('email', email)
-        .maybeSingle();
+        .order('created_at', { ascending: false })
+        .limit(1);
 
       if (leadError) {
         throw new Error('Leads Table Query Error: ' + leadError.message);
       }
+
+      const lead = leads && leads.length > 0 ? leads[0] : null;
 
       if (!lead) {
         setStatusText('No application profile found. Redirecting to application...');

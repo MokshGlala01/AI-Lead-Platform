@@ -44,7 +44,8 @@ export default function LoginPage() {
       }
 
       // Default Student routing
-      const { data: lead } = await supabase.from('leads').select('id').eq('email', email).maybeSingle();
+      const { data: leads } = await supabase.from('leads').select('id').eq('email', email).limit(1);
+      const lead = leads && leads.length > 0 ? leads[0] : null;
       if (lead) {
         router.push('/dashboard');
       } else {
