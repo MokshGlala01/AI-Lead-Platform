@@ -89,7 +89,7 @@ export default function StudentDashboard() {
     }));
   };
 
-  if (loading) {
+  if (loading || !student) {
     return (
       <div className="min-h-screen bg-[#050816] text-[#F9FAFB] flex flex-col items-center justify-center font-sans">
         <Loader2 className="w-8 h-8 text-brand-primary animate-spin mb-2" />
