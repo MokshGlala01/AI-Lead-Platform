@@ -21,8 +21,8 @@ const Sidebar: React.FC = () => {
     { label: 'Rejected', value: 'Rejected', color: 'bg-brand-danger' }
   ];
 
-  const isDashboardActive = pathname === '/dashboard' && !currentStatusFilter;
-  const isAnalyticsActive = pathname === '/dashboard/analytics';
+  const isDashboardActive = pathname === '/admin' && !currentStatusFilter;
+  const isAnalyticsActive = pathname === '/admin/analytics';
 
   return (
     <aside className="w-60 border-r border-slate-800/80 bg-slate-950 min-h-[calc(100vh-64px)] p-4 flex flex-col justify-between hidden md:flex shrink-0">
@@ -34,7 +34,7 @@ const Sidebar: React.FC = () => {
           </span>
           
           <Link
-            href="/dashboard"
+            href="/admin"
             className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold transition-all ${
               isDashboardActive
                 ? 'bg-brand-primary/10 text-brand-primary font-extrabold'
@@ -46,7 +46,7 @@ const Sidebar: React.FC = () => {
           </Link>
           
           <Link
-            href="/dashboard/analytics"
+            href="/admin/analytics"
             className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold transition-all ${
               isAnalyticsActive
                 ? 'bg-brand-primary/10 text-brand-primary font-extrabold'
@@ -70,7 +70,7 @@ const Sidebar: React.FC = () => {
               return (
                 <Link
                   key={shortcut.value}
-                  href={`/dashboard?status=${shortcut.value}`}
+                  href={`/admin?status=${shortcut.value}`}
                   className={`flex items-center justify-between px-3 py-2 rounded-lg text-[11px] font-semibold transition-all ${
                     isActive
                       ? 'bg-slate-900 text-brand-white font-bold'

@@ -117,7 +117,7 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ leads, onStatusChange }) => {
                         </div>
 
                         <Link
-                          href={`/dashboard/leads/${lead.id}`}
+                          href={`/admin/leads/${lead.id}`}
                           className="p-1 rounded-lg text-slate-500 hover:text-brand-white hover:bg-slate-800/50 transition-all shrink-0"
                           title="View Profile"
                         >

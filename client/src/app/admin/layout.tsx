@@ -50,14 +50,25 @@ export default function DashboardLayout({
       if (!session) {
         router.replace('/login');
       } else {
-        setCheckingAuth(false);
+        // Restrict access to counselors only
+        const { data: counselor } = await supabase.from('counselors').select('id').eq('email', session.user.email).maybeSingle();
+        if (!counselor) {
+          router.replace('/dashboard');
+        } else {
+          setCheckingAuth(false);
+        }
       }
     }
     checkAuth();
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (event === 'SIGNED_OUT' || !session) {
         router.replace('/login');
+      } else if (event === 'SIGNED_IN' || event === 'INITIAL_SESSION') {
+        const { data: counselor } = await supabase.from('counselors').select('id').eq('email', session.user.email).maybeSingle();
+        if (!counselor) {
+          router.replace('/dashboard');
+        }
       }
     });
 

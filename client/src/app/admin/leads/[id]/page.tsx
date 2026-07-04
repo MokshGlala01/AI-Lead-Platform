@@ -123,7 +123,7 @@ const LeadDetailPageContent: React.FC = () => {
     try {
       const apiUrl = typeof window !== 'undefined' ? '' : (process.env.NEXT_PUBLIC_API_URL || '');
       await axios.delete(apiUrl + '/api/leads/' + id);
-      router.push('/dashboard');
+      router.push('/admin');
     } catch (err) {
       console.error('Failed to delete lead:', err);
     }
@@ -142,8 +142,8 @@ const LeadDetailPageContent: React.FC = () => {
     return (
       <div className="flex flex-col items-center justify-center min-h-[400px] gap-4">
         <p className="text-xs font-bold text-brand-danger uppercase tracking-widest">{error || 'Lead Profile Not Found'}</p>
-        <Link href="/dashboard" className="text-xs font-bold text-brand-primary hover:underline flex items-center gap-1.5 uppercase tracking-wider">
-          <ArrowLeft className="w-4 h-4" /> Back to dashboard
+        <Link href="/admin" className="text-xs font-bold text-brand-primary hover:underline flex items-center gap-1.5 uppercase tracking-wider">
+          <ArrowLeft className="w-4 h-4" /> Back to admin portal
         </Link>
       </div>
     );
@@ -157,9 +157,9 @@ const LeadDetailPageContent: React.FC = () => {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 select-none">
         <div className="flex items-center gap-4">
           <Link
-            href="/dashboard"
+            href="/admin"
             className="p-2 bg-slate-950 border border-slate-850 hover:bg-slate-900 rounded-xl shadow-sm text-slate-500 hover:text-slate-300 transition-all"
-            title="Back to Dashboard"
+            title="Back to Admin Portal"
           >
             <ArrowLeft className="w-4.5 h-4.5" />
           </Link>

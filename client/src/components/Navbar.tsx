@@ -15,7 +15,7 @@ const Navbar: React.FC<NavbarProps> = ({ onAddLeadClick, hotCount = 0 }) => {
   return (
     <nav className="h-16 border-b border-slate-800/80 bg-brand-bg/80 backdrop-blur-md px-6 flex items-center justify-between sticky top-0 z-40">
       {/* Brand Logo */}
-      <Link href="/dashboard" className="flex items-center gap-2.5 group">
+      <Link href="/admin" className="flex items-center gap-2.5 group">
         <div className="p-2 bg-brand-primary rounded-xl text-white shadow-lg shadow-brand-primary/20 group-hover:scale-105 transition-transform">
           <GraduationCap className="w-5 h-5" />
         </div>

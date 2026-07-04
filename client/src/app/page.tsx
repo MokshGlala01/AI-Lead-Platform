@@ -1,12 +1,59 @@
 'use client';
 
-// Futuristic public enrollment portal with WebGL floating network background and registration form
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import ThreeDHeroCanvas from '../components/3d/ThreeDHeroCanvas';
-import LeadForm from '../components/LeadForm';
-import { Target, Users, Code, Award, GraduationCap, ArrowRight, Zap, Shield, Sparkles } from 'lucide-react';
+import { supabase } from '../lib/supabase';
+import { Target, Users, Code, Award, GraduationCap, ArrowRight, Zap, Shield, Sparkles, Loader2 } from 'lucide-react';
 
 const LandingPage: React.FC = () => {
+  const router = useRouter();
+  const [session, setSession] = useState<any>(null);
+  const [checkingAuth, setCheckingAuth] = useState(true);
+  const [redirecting, setRedirecting] = useState(false);
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      setCheckingAuth(false);
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const handleApplyClick = async () => {
+    if (!session) {
+      router.push('/login?redirect=/application');
+      return;
+    }
+
+    setRedirecting(true);
+    try {
+      // Check if they are counselor
+      const { data: counselor } = await supabase.from('counselors').select('id').eq('email', session.user.email).maybeSingle();
+      if (counselor) {
+        router.push('/admin');
+        return;
+      }
+
+      // Check if they already have an application
+      const { data: lead } = await supabase.from('leads').select('id').eq('email', session.user.email).maybeSingle();
+      if (lead) {
+        router.push('/dashboard');
+      } else {
+        router.push('/application');
+      }
+    } catch (err) {
+      console.error(err);
+      router.push('/application');
+    } finally {
+      setRedirecting(false);
+    }
+  };
   return (
     <div className="min-h-screen bg-[#050816] text-[#F9FAFB] flex flex-col relative overflow-hidden font-sans">
       {/* 3D WebGL Background Particle Layer */}
@@ -25,8 +72,40 @@ const LandingPage: React.FC = () => {
             EFOS Education
           </span>
         </div>
-        <div className="flex items-center gap-4 text-xs font-bold text-slate-400 uppercase tracking-widest">
-          <span>Console Edition v1.0</span>
+        <div className="flex items-center gap-4">
+          {checkingAuth ? (
+            <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider animate-pulse">Checking Auth...</span>
+          ) : session ? (
+            <button
+              onClick={async () => {
+                try {
+                  const { data: counselor } = await supabase.from('counselors').select('id').eq('email', session.user.email).maybeSingle();
+                  if (counselor) {
+                    router.push('/admin');
+                  } else {
+                    const { data: lead } = await supabase.from('leads').select('id').eq('email', session.user.email).maybeSingle();
+                    if (lead) {
+                      router.push('/dashboard');
+                    } else {
+                      router.push('/application');
+                    }
+                  }
+                } catch (err) {
+                  router.push('/dashboard');
+                }
+              }}
+              className="text-[10px] font-extrabold text-brand-primary hover:text-brand-white bg-brand-primary/10 hover:bg-brand-primary/20 px-3.5 py-2 rounded-xl transition-all border border-brand-primary/20 uppercase tracking-wider"
+            >
+              My Console
+            </button>
+          ) : (
+            <button
+              onClick={() => router.push('/login')}
+              className="text-[10px] font-extrabold text-slate-400 hover:text-brand-white transition-all uppercase tracking-wider hover:underline"
+            >
+              Sign In
+            </button>
+          )}
         </div>
       </header>
 
@@ -86,7 +165,7 @@ const LandingPage: React.FC = () => {
               <div className="flex flex-col gap-1">
                 <h3 className="text-xs font-bold text-slate-200">Practical Framework</h3>
                 <p className="text-[11px] text-slate-500 font-semibold leading-relaxed">
-                  Full stack Next.js 15, Express, Prisma ORM, and PostgreSQL engine built for scale.
+                  Next.js 15, Supabase PostgreSQL, Supabase Auth, Realtime, AI-powered automation.
                 </p>
               </div>
             </div>
@@ -105,18 +184,40 @@ const LandingPage: React.FC = () => {
           </div>
         </div>
 
-        {/* Right Side: Glass Form Card (Lg: 5 Columns) */}
-        <div className="lg:col-span-5 bg-slate-900/60 border border-slate-800/80 p-6 rounded-2xl shadow-2xl shadow-brand-primary/5 backdrop-blur-xl flex flex-col gap-6 relative">
+        {/* Right Side: Glass CTA Card (Lg: 5 Columns) */}
+        <div className="lg:col-span-5 bg-slate-900/60 border border-slate-800/80 p-8 rounded-2xl shadow-2xl shadow-brand-primary/5 backdrop-blur-xl flex flex-col gap-6 relative justify-center text-center">
           <div className="absolute -inset-[1px] bg-gradient-to-r from-brand-primary/20 via-brand-secondary/20 to-brand-accent/20 rounded-2xl -z-10 pointer-events-none blur-sm" />
-          <div className="flex flex-col gap-1 border-b border-slate-800/60 pb-4 select-none">
-            <h2 className="text-lg font-bold font-heading text-brand-white flex items-center gap-2">
-              Apply For Counseling
+          
+          <div className="w-12 h-12 rounded-full bg-brand-primary/10 border border-brand-primary/20 flex items-center justify-center text-brand-primary mx-auto shadow-inner shadow-brand-primary/5">
+            <Sparkles className="w-5 h-5 animate-pulse" />
+          </div>
+
+          <div className="flex flex-col gap-2 select-none">
+            <h2 className="text-xl font-bold font-heading text-brand-white tracking-tight">
+              Start Your Admission
             </h2>
-            <p className="text-xs text-slate-500 font-semibold">
-              Fill in your details below to evaluate your admission probability score.
+            <p className="text-xs text-slate-400 font-semibold leading-relaxed">
+              Submit your credentials to run our AI-powered qualification analysis, get matched with an expert mentor, and view your customized progression path in real-time.
             </p>
           </div>
-          <LeadForm />
+
+          <button
+            onClick={handleApplyClick}
+            disabled={redirecting}
+            className="w-full mt-2 inline-flex items-center justify-center gap-2 px-5 py-3.5 bg-brand-primary text-white font-extrabold text-xs uppercase tracking-wider rounded-xl shadow-lg hover:shadow-brand-primary/25 hover:bg-brand-primary-light active:scale-[0.98] transition-all border border-brand-primary/15 disabled:opacity-50 select-none group cursor-pointer"
+          >
+            {redirecting ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin" />
+                Configuring Portal...
+              </>
+            ) : (
+              <>
+                Apply For Counseling
+                <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+              </>
+            )}
+          </button>
         </div>
       </main>
 

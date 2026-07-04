@@ -128,7 +128,7 @@ const CommandPalette: React.FC = () => {
                   </div>
 
                   <button
-                    onClick={() => navigateTo('/dashboard')}
+                    onClick={() => navigateTo('/admin')}
                     className="w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold text-slate-300 hover:text-brand-white hover:bg-brand-primary/10 transition-all text-left group"
                   >
                     <div className="flex items-center gap-3">
@@ -141,7 +141,7 @@ const CommandPalette: React.FC = () => {
                   </button>
 
                   <button
-                    onClick={() => navigateTo('/dashboard/analytics')}
+                    onClick={() => navigateTo('/admin/analytics')}
                     className="w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold text-slate-300 hover:text-brand-white hover:bg-brand-primary/10 transition-all text-left group"
                   >
                     <div className="flex items-center gap-3">
@@ -180,7 +180,7 @@ const CommandPalette: React.FC = () => {
                     results.map((lead) => (
                       <button
                         key={lead.id}
-                        onClick={() => navigateTo(`/dashboard/leads/${lead.id}`)}
+                        onClick={() => navigateTo(`/admin/leads/${lead.id}`)}
                         className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold text-slate-300 hover:text-brand-white hover:bg-brand-primary/10 transition-all text-left"
                       >
                         <div className="flex flex-col gap-0.5">

@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { signIn } from '@/lib/auth';
+import { supabase } from '@/lib/supabase';
 import { GraduationCap, Loader2, AlertTriangle } from 'lucide-react';
 
 export default function LoginPage() {
@@ -27,12 +28,28 @@ export default function LoginPage() {
     try {
       const { data, error } = await signIn(email, password);
 
-      if (error) {
-        throw error;
+      // Determine the destination dynamically
+      const { data: counselor } = await supabase.from('counselors').select('id').eq('email', email).maybeSingle();
+      if (counselor) {
+        router.push('/admin');
+        return;
       }
 
-      // Redirect on success
-      router.push('/dashboard');
+      // Check query parameter redirection
+      const searchParams = new URLSearchParams(window.location.search);
+      const redirect = searchParams.get('redirect');
+      if (redirect) {
+        router.push(redirect);
+        return;
+      }
+
+      // Default Student routing
+      const { data: lead } = await supabase.from('leads').select('id').eq('email', email).maybeSingle();
+      if (lead) {
+        router.push('/dashboard');
+      } else {
+        router.push('/application');
+      }
     } catch (err: any) {
       console.error('Login error:', err);
       setErrorMsg(err.message || 'Invalid email or password. Please try again.');

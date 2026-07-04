@@ -2,19 +2,22 @@
 
 // Reusable lead form styled for luxury dark themed dashboard modals and student portal submissions
 import React, { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import axios from 'axios';
-import { Loader2, CheckCircle2, AlertTriangle } from 'lucide-react';
+import { Loader2, CheckCircle2, AlertTriangle, ArrowRight } from 'lucide-react';
 
 interface LeadFormProps {
   onSubmitSuccess?: (lead: any) => void;
   isModal?: boolean;
   onCancel?: () => void;
+  prefilledEmail?: string;
 }
 
-const LeadForm: React.FC<LeadFormProps> = ({ onSubmitSuccess, isModal = false, onCancel }) => {
+const LeadForm: React.FC<LeadFormProps> = ({ onSubmitSuccess, isModal = false, onCancel, prefilledEmail }) => {
+  const router = useRouter();
   const [formData, setFormData] = useState({
     name: '',
-    email: '',
+    email: prefilledEmail || '',
     phone: '',
     city: '',
     age: '',
@@ -23,6 +26,12 @@ const LeadForm: React.FC<LeadFormProps> = ({ onSubmitSuccess, isModal = false, o
     downloaded_brochure: false,
     website_visits: 1
   });
+
+  React.useEffect(() => {
+    if (prefilledEmail) {
+      setFormData((prev) => ({ ...prev, email: prefilledEmail }));
+    }
+  }, [prefilledEmail]);
 
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
@@ -84,14 +93,24 @@ const LeadForm: React.FC<LeadFormProps> = ({ onSubmitSuccess, isModal = false, o
 
   if (success) {
     return (
-      <div className="flex flex-col items-center justify-center p-8 text-center gap-4 animate-fade-in">
+      <div className="flex flex-col items-center justify-center p-8 text-center gap-6 animate-fade-in select-none">
         <div className="p-4 bg-brand-green/10 border border-brand-green/20 rounded-full text-brand-green">
           <CheckCircle2 className="w-12 h-12" />
         </div>
-        <h3 className="text-xl font-bold text-brand-white">Application Recorded!</h3>
-        <p className="text-sm text-slate-400 max-w-sm">
-          Thank you, <span className="font-semibold text-brand-white">{formData.name}</span>. An admissions counselor will auto-grade your enrollment probability shortly.
-        </p>
+        <div className="flex flex-col gap-2">
+          <h3 className="text-xl font-bold text-brand-white">Application Recorded!</h3>
+          <p className="text-sm text-slate-400 max-w-sm">
+            Thank you, <span className="font-semibold text-brand-white">{formData.name}</span>. An admissions counselor will auto-grade your enrollment probability shortly.
+          </p>
+        </div>
+        
+        <button
+          onClick={() => router.push('/dashboard')}
+          className="mt-2 inline-flex items-center justify-center gap-2 px-5 py-3.5 bg-brand-primary text-white font-extrabold text-xs uppercase tracking-wider rounded-xl shadow-lg hover:shadow-brand-primary/25 hover:bg-brand-primary-light active:scale-[0.98] transition-all border border-brand-primary/15 cursor-pointer group"
+        >
+          Track My Application
+          <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+        </button>
       </div>
     );
   }
@@ -149,8 +168,9 @@ const LeadForm: React.FC<LeadFormProps> = ({ onSubmitSuccess, isModal = false, o
             name="email"
             value={formData.email}
             onChange={handleChange}
+            disabled={!!prefilledEmail}
             placeholder="e.g. jane@example.com"
-            className="px-3.5 py-2.5 bg-slate-950 border border-slate-800 text-sm rounded-xl focus:outline-none focus:border-brand-primary transition-all text-brand-white placeholder:text-slate-655"
+            className="px-3.5 py-2.5 bg-slate-950 border border-slate-800 text-sm rounded-xl focus:outline-none focus:border-brand-primary transition-all text-brand-white placeholder:text-slate-655 disabled:opacity-60 disabled:cursor-not-allowed"
           />
         </div>
 
