@@ -7,6 +7,7 @@ import { signOut } from '@/lib/auth';
 import ThreeDHeroCanvas from '@/components/3d/ThreeDHeroCanvas';
 import ScoreBadge from '@/components/ui/ScoreBadge';
 import StatusBadge from '@/components/ui/StatusBadge';
+import ChatbotWidget from '@/components/ChatbotWidget';
 import { School, LogOut, Loader2, Sparkles, User, Mail, Calendar, Phone, Clock, FileText, CheckCircle2 } from 'lucide-react';
 
 export default function StudentDashboard() {
@@ -16,6 +17,8 @@ export default function StudentDashboard() {
   const [activities, setActivities] = useState<any[]>([]);
   const [statusText, setStatusText] = useState('Verifying authentication session...');
   const [error, setError] = useState<string | null>(null);
+  const [uploadingSlot, setUploadingSlot] = useState<string | null>(null);
+  const [uploadError, setUploadError] = useState<string | null>(null);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -94,6 +97,61 @@ export default function StudentDashboard() {
       }, 4000);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleUpload = async (slot: string, file: File) => {
+    try {
+      setUploadingSlot(slot);
+      setUploadError(null);
+
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${student.id}/${slot}-${Date.now()}.${fileExt}`;
+
+      // Upload file to Supabase storage documents bucket
+      const { error: uploadError } = await supabase.storage
+        .from('documents')
+        .upload(fileName, file, {
+          cacheControl: '3600',
+          upsert: true
+        });
+
+      if (uploadError) {
+        throw new Error('Supabase Storage Error: ' + uploadError.message + '. Please ensure a public bucket named "documents" is created in your Supabase console.');
+      }
+
+      // Get public URL
+      const { data: { publicUrl } } = supabase.storage
+        .from('documents')
+        .getPublicUrl(fileName);
+
+      // Update lead record with document URL
+      const updateData: any = {};
+      updateData[slot] = publicUrl;
+
+      const { error: updateError } = await supabase
+        .from('leads')
+        .update(updateData)
+        .eq('id', student.id);
+
+      if (updateError) throw updateError;
+
+      // Update local state
+      setStudent((prev: any) => ({ ...prev, ...updateData }));
+
+      // Add activity log
+      await supabase.from('lead_activity').insert({
+        lead_id: student.id,
+        activity_type: 'document_uploaded',
+        description: `Student uploaded credential: ${slot.replace('document_', '').replace('_', ' ')}`
+      });
+
+      fetchStudentData(student.email);
+    } catch (err: any) {
+      console.error('Upload failed:', err);
+      setUploadError(err.message || 'Failed to upload document.');
+    } finally {
+      setUploadingSlot(null);
     }
   };
 
@@ -192,13 +250,22 @@ export default function StudentDashboard() {
         {/* Left Side: Score & Timeline (Lg: 8 Columns) */}
         <div className="lg:col-span-8 flex flex-col gap-6">
           {/* Welcome greeting */}
-          <div className="flex flex-col gap-1.5">
-            <h1 className="text-2xl font-black font-heading text-brand-white tracking-tight flex items-center gap-2">
-              Welcome back, {student.name} <Sparkles className="w-5 h-5 text-brand-primary animate-pulse" />
-            </h1>
-            <p className="text-xs text-slate-400 font-semibold leading-relaxed">
-              Track your counseling details, qualification metrics, and outreach updates in real-time.
-            </p>
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 select-none no-print">
+            <div className="flex flex-col gap-1.5">
+              <h1 className="text-2xl font-black font-heading text-brand-white tracking-tight flex items-center gap-2">
+                Welcome back, {student.name} <Sparkles className="w-5 h-5 text-brand-primary animate-pulse" />
+              </h1>
+              <p className="text-xs text-slate-400 font-semibold leading-relaxed">
+                Track your counseling details, qualification metrics, and outreach updates in real-time.
+              </p>
+            </div>
+            <button
+              onClick={() => window.print()}
+              className="flex items-center gap-2 px-4 py-2.5 bg-slate-950 border border-slate-800 hover:bg-slate-900 rounded-xl text-xs font-bold text-slate-350 hover:text-slate-200 transition-all uppercase tracking-wider cursor-pointer shrink-0"
+            >
+              <FileText className="w-4 h-4 text-brand-primary" />
+              Admission Report
+            </button>
           </div>
 
           {/* Cards Grid */}
@@ -281,6 +348,97 @@ export default function StudentDashboard() {
                   </div>
                 </div>
               ))}
+            </div>
+          </div>
+
+          {/* Document Verification Card */}
+          <div className="bg-slate-900/60 border border-slate-800/80 p-6 rounded-2xl backdrop-blur-xl flex flex-col gap-6 no-print">
+            <div className="flex flex-col gap-1 select-none">
+              <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">
+                Verification Credentials
+              </span>
+              <p className="text-[10px] text-slate-500 font-semibold leading-relaxed">
+                Please upload clear copies of your documents. File size must be under 5MB.
+              </p>
+            </div>
+
+            {uploadError && (
+              <div className="p-3 bg-brand-danger/10 border border-brand-danger/20 rounded-xl text-[10px] font-bold text-brand-danger">
+                {uploadError}
+              </div>
+            )}
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {[
+                { label: '10th Marksheet', slot: 'document_10th' },
+                { label: '12th Marksheet', slot: 'document_12th' },
+                { label: 'Aadhaar / Passport ID', slot: 'document_aadhaar' },
+                { label: 'Passport Size Photo', slot: 'document_photo' }
+              ].map((doc) => {
+                const isUploaded = !!student[doc.slot];
+                const isUploading = uploadingSlot === doc.slot;
+                
+                return (
+                  <div key={doc.slot} className="bg-slate-950/40 border border-slate-850 p-4 rounded-xl flex flex-col gap-3 justify-between">
+                    <div className="flex flex-col gap-0.5 select-none">
+                      <span className="text-xs font-bold text-slate-200">{doc.label}</span>
+                      <span className="text-[9px] font-bold uppercase tracking-wider text-slate-500">
+                        {isUploaded ? 'Verified File' : 'Required'}
+                      </span>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      {isUploading ? (
+                        <div className="flex items-center gap-2 text-brand-primary text-xs font-bold select-none py-1">
+                          <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                          Uploading...
+                        </div>
+                      ) : isUploaded ? (
+                        <div className="flex items-center justify-between w-full gap-2">
+                          <a
+                            href={student[doc.slot]}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1.5 text-xs text-brand-primary hover:underline font-bold"
+                          >
+                            View File
+                          </a>
+                          <button
+                            onClick={() => {
+                              const input = document.getElementById(`file-${doc.slot}`);
+                              input?.click();
+                            }}
+                            className="px-2.5 py-1 bg-slate-900 border border-slate-800 hover:bg-slate-850 rounded-lg text-[9px] font-bold text-slate-400 hover:text-slate-200 transition-all uppercase tracking-wider cursor-pointer"
+                          >
+                            Replace
+                          </button>
+                        </div>
+                      ) : (
+                        <button
+                          onClick={() => {
+                            const input = document.getElementById(`file-${doc.slot}`);
+                            input?.click();
+                          }}
+                          className="w-full flex items-center justify-center gap-1.5 px-3 py-2 bg-slate-900 border border-slate-800 hover:bg-slate-850 hover:border-slate-750 text-[10px] font-bold text-slate-400 hover:text-slate-200 rounded-lg transition-all cursor-pointer uppercase tracking-wider"
+                        >
+                          Select File
+                        </button>
+                      )}
+
+                      <input
+                        id={`file-${doc.slot}`}
+                        type="file"
+                        accept="application/pdf,image/*"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) handleUpload(doc.slot, file);
+                        }}
+                        className="hidden"
+                      />
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           </div>
         </div>
@@ -367,6 +525,68 @@ export default function StudentDashboard() {
           </div>
         </div>
       </main>
+
+      {/* Printable Admission Report Sheet */}
+      <div className="hidden print:block bg-white text-black p-8 max-w-4xl mx-auto font-sans">
+        <div className="flex justify-between items-center border-b-2 border-slate-900 pb-6 mb-6">
+          <div className="flex flex-col">
+            <span className="text-3xl font-black tracking-tight uppercase">CampusFlow</span>
+            <span className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Official Admissions Report</span>
+          </div>
+          <div className="text-right text-xs">
+            <p className="font-bold">Date: {new Date().toLocaleDateString()}</p>
+            <p>Application ID: CF-{student.id.substring(0, 8).toUpperCase()}</p>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 gap-8 mb-8">
+          <div className="flex flex-col gap-2">
+            <h3 className="text-xs font-bold uppercase tracking-widest text-slate-500 border-b border-slate-350 pb-1.5">Student Details</h3>
+            <p className="text-sm"><span className="font-bold">Full Name:</span> {student.name}</p>
+            <p className="text-sm"><span className="font-bold">Email:</span> {student.email}</p>
+            <p className="text-sm"><span className="font-bold">Phone:</span> {student.phone}</p>
+            <p className="text-sm"><span className="font-bold">City:</span> {student.city || 'Unspecified'}</p>
+            <p className="text-sm"><span className="font-bold">Age:</span> {student.age || 'Unspecified'}</p>
+          </div>
+
+          <div className="flex flex-col gap-2">
+            <h3 className="text-xs font-bold uppercase tracking-widest text-slate-500 border-b border-slate-350 pb-1.5">Enrollment Assessment</h3>
+            <p className="text-sm"><span className="font-bold">Course Applied:</span> {student.course_interest}</p>
+            <p className="text-sm"><span className="font-bold">AI Qualification Score:</span> {student.score} / 100 ({student.category})</p>
+            <p className="text-sm"><span className="font-bold">Status:</span> {student.status}</p>
+            <p className="text-sm">
+              <span className="font-bold">Assigned Counselor:</span> {student.counselors ? student.counselors.name : 'Pending Assignment'}
+            </p>
+          </div>
+        </div>
+
+        {student.counselors && (
+          <div className="border border-slate-350 p-4 rounded-xl mb-8 bg-slate-50">
+            <h3 className="text-xs font-bold uppercase tracking-widest text-slate-500 mb-2">Coordinator Contact Info</h3>
+            <p className="text-sm">Please reach out to your admissions coordinator <span className="font-bold">{student.counselors.name}</span> at <span className="font-semibold text-brand-primary">{student.counselors.email}</span> or call <span className="font-semibold">{student.counselors.phone || 'N/A'}</span> to schedule your final orientation and payment setup.</p>
+          </div>
+        )}
+
+        <div className="border-t border-slate-350 pt-6 mt-12 text-center text-[9px] text-slate-500">
+          This is an automated admissions assessment report generated by CampusFlow AI.
+          © 2026 CampusFlow Inc. All Rights Reserved.
+        </div>
+      </div>
+
+      {/* Ask CampusFlow AI chat bubble */}
+      <ChatbotWidget />
+
+      <style dangerouslySetInnerHTML={{ __html: `
+        @media print {
+          body, html {
+            background: white !important;
+            color: black !important;
+          }
+          header, footer, main, aside, button, .no-print {
+            display: none !important;
+          }
+        }
+      `}} />
     </div>
   );
 }
