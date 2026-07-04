@@ -200,17 +200,31 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // Trigger n8n Webhook async
-    const n8nWebhook = process.env.N8N_WEBHOOK_URL;
+    // Trigger n8n Webhook
+    const n8nWebhook = process.env.NEXT_PUBLIC_N8N_WEBHOOK || process.env.N8N_WEBHOOK_URL;
     if (n8nWebhook && n8nWebhook.startsWith('http')) {
-      const payload = mapLeadKeys(finalLead);
-      fetch(n8nWebhook, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      }).catch((err) => {
+      try {
+        await fetch(
+          n8nWebhook,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+              name,
+              email,
+              phone: cleanPhone,
+              city,
+              qualification,
+              course_interest
+            })
+          }
+        );
+        console.log('Successfully triggered n8n webhook for lead registration:', finalLead.id);
+      } catch (err: any) {
         console.error('Failed to trigger n8n webhook:', err.message);
-      });
+      }
     }
 
     return NextResponse.json(mapLeadKeys(finalLead), { status: 201 });
