@@ -14,30 +14,39 @@ export default function StudentDashboard() {
   const [loading, setLoading] = useState(true);
   const [student, setStudent] = useState<any>(null);
   const [activities, setActivities] = useState<any[]>([]);
+  const [statusText, setStatusText] = useState('Verifying authentication session...');
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (!session) {
+        setStatusText('No active session found. Redirecting to login...');
         router.replace('/login');
       } else {
+        setStatusText('Retrieving lead profile...');
         fetchStudentData(session.user.email || '');
       }
+    }).catch(err => {
+      console.error(err);
+      setError('Auth Session Retrieval Error: ' + err.message);
     });
   }, [router]);
 
   const fetchStudentData = async (email: string) => {
     try {
-      // 1. Fetch student lead record
+      setStatusText('Retrieving lead profile...');
       const { data: lead, error: leadError } = await supabase
         .from('leads')
         .select('*')
         .eq('email', email)
         .maybeSingle();
 
-      if (leadError) throw leadError;
+      if (leadError) {
+        throw new Error('Leads Table Query Error: ' + leadError.message);
+      }
 
       if (!lead) {
-        // No application found, take to application page
+        setStatusText('No application profile found. Redirecting to application...');
         router.replace('/application');
         return;
       }
@@ -45,12 +54,15 @@ export default function StudentDashboard() {
       // Fetch counselor separately to prevent relational query errors
       let counselor = null;
       if (lead.counselor_id) {
+        setStatusText('Fetching counselor assignment...');
         const { data: cData, error: cError } = await supabase
           .from('counselors')
           .select('*')
           .eq('id', lead.counselor_id)
           .maybeSingle();
-        if (!cError) {
+        if (cError) {
+          console.error('Counselors Query Error:', cError);
+        } else {
           counselor = cData;
         }
       }
@@ -58,19 +70,25 @@ export default function StudentDashboard() {
       setStudent({ ...lead, counselors: counselor });
 
       // 2. Fetch activity log
+      setStatusText('Loading activity logs...');
       const { data: logs, error: logsError } = await supabase
         .from('lead_activity')
         .select('*')
         .eq('lead_id', lead.id)
         .order('created_at', { ascending: false });
 
-      if (!logsError) {
+      if (logsError) {
+        console.error('Lead Activity Query Error:', logsError);
+      } else {
         setActivities(logs || []);
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error('Error loading student dashboard details:', err);
-      // Fallback redirect to prevent page freeze
-      router.replace('/application');
+      setError(err.message || 'An unexpected error occurred.');
+      // Wait a moment and fallback redirect
+      setTimeout(() => {
+        router.replace('/application');
+      }, 4000);
     } finally {
       setLoading(false);
     }
@@ -104,11 +122,29 @@ export default function StudentDashboard() {
     }));
   };
 
+  if (error) {
+    return (
+      <div className="min-h-screen bg-[#050816] text-[#F9FAFB] flex flex-col items-center justify-center p-6 font-sans text-center">
+        <div className="p-5 bg-brand-danger/10 border border-brand-danger/25 rounded-2xl max-w-md flex flex-col gap-3 backdrop-blur-xl relative">
+          <div className="absolute -inset-[1px] bg-brand-danger/10 rounded-2xl -z-10 blur-sm" />
+          <span className="text-xs font-bold text-brand-danger uppercase tracking-widest">Portal Access Error</span>
+          <p className="text-xs text-slate-300 leading-relaxed">{error}</p>
+          <button
+            onClick={() => router.replace('/application')}
+            className="mt-4 px-4 py-2.5 bg-slate-950 border border-slate-800 hover:bg-slate-900 rounded-xl text-[10px] font-bold text-slate-400 hover:text-slate-200 transition-all uppercase tracking-wider cursor-pointer"
+          >
+            Go to Application Form
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   if (loading || !student) {
     return (
-      <div className="min-h-screen bg-[#050816] text-[#F9FAFB] flex flex-col items-center justify-center font-sans">
+      <div className="min-h-screen bg-[#050816] text-[#F9FAFB] flex flex-col items-center justify-center font-sans text-center gap-3">
         <Loader2 className="w-8 h-8 text-brand-primary animate-spin mb-2" />
-        <span className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Synchronizing Session...</span>
+        <span className="text-[10px] font-bold uppercase tracking-widest text-slate-500">{statusText}</span>
       </div>
     );
   }
