@@ -30,7 +30,7 @@ export default function StudentDashboard() {
       // 1. Fetch student lead record
       const { data: lead, error: leadError } = await supabase
         .from('leads')
-        .select('*, counselors(*)')
+        .select('*')
         .eq('email', email)
         .maybeSingle();
 
@@ -42,7 +42,20 @@ export default function StudentDashboard() {
         return;
       }
 
-      setStudent(lead);
+      // Fetch counselor separately to prevent relational query errors
+      let counselor = null;
+      if (lead.counselor_id) {
+        const { data: cData, error: cError } = await supabase
+          .from('counselors')
+          .select('*')
+          .eq('id', lead.counselor_id)
+          .maybeSingle();
+        if (!cError) {
+          counselor = cData;
+        }
+      }
+
+      setStudent({ ...lead, counselors: counselor });
 
       // 2. Fetch activity log
       const { data: logs, error: logsError } = await supabase
@@ -56,6 +69,8 @@ export default function StudentDashboard() {
       }
     } catch (err) {
       console.error('Error loading student dashboard details:', err);
+      // Fallback redirect to prevent page freeze
+      router.replace('/application');
     } finally {
       setLoading(false);
     }
