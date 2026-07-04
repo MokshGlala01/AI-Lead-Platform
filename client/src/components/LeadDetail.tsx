@@ -62,6 +62,7 @@ interface Lead {
   counselorId: string | null;
   counselor?: Counselor | null;
   messages?: Message[];
+  aiRecommendation?: string | null;
 }
 
 interface LeadDetailProps {
@@ -439,6 +440,29 @@ const LeadDetail: React.FC<LeadDetailProps> = ({
               ))}
             </div>
           )}
+        </div>
+
+        {/* AI Recommendations Diagnostics Card */}
+        <div className="bg-slate-900/60 p-6 rounded-2xl border border-slate-800/80 backdrop-blur-md flex flex-col gap-4 relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-24 h-24 bg-brand-primary/5 rounded-full -z-10 blur-xl" />
+          <div className="flex items-center justify-between select-none">
+            <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">
+              AI Qualification Insight
+            </span>
+            <div className="flex items-center gap-1.5 px-2 py-0.5 bg-brand-primary/10 border border-brand-primary/20 rounded-full text-[9px] font-bold text-brand-primary uppercase tracking-wider select-none animate-pulse">
+              <Sparkles className="w-3 h-3" />
+              Qualified Recommendation
+            </div>
+          </div>
+
+          <div className="flex flex-col gap-2 bg-slate-950 border border-slate-850 p-4 rounded-xl">
+            <span className="text-[9px] font-extrabold uppercase tracking-wider text-slate-500 select-none">
+              AI Suggestion
+            </span>
+            <p className="text-xs text-slate-300 font-semibold leading-relaxed font-sans">
+              "{lead.aiRecommendation || 'Evaluation complete. Student fits standard profile requirements.'}"
+            </p>
+          </div>
         </div>
 
         {/* AI Drafting System */}

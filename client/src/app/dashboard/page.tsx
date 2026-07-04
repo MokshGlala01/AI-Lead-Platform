@@ -494,6 +494,29 @@ export default function StudentDashboard() {
             )}
           </div>
 
+          {/* AI Enrollment Insights Card */}
+          <div className="bg-slate-900/60 border border-slate-800/80 p-6 rounded-2xl backdrop-blur-xl flex flex-col gap-4 relative overflow-hidden no-print">
+            <div className="absolute top-0 right-0 w-24 h-24 bg-brand-primary/5 rounded-full -z-10 blur-xl" />
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">
+                AI Enrollment Insights
+              </span>
+              <div className="flex items-center gap-1.5 px-2.5 py-0.5 bg-brand-primary/10 border border-brand-primary/20 rounded-full text-[9px] font-bold text-brand-primary uppercase tracking-wider select-none animate-pulse">
+                <Sparkles className="w-3 h-3" />
+                Active Analysis
+              </div>
+            </div>
+
+            <div className="flex flex-col gap-2 bg-slate-950/40 border border-slate-850 p-4.5 rounded-xl">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 select-none">
+                AI Recommendation
+              </span>
+              <p className="text-xs text-slate-300 font-semibold leading-relaxed">
+                "{student.ai_recommendation || 'Standard lead follow-up. Admissions profile review pending.'}"
+              </p>
+            </div>
+          </div>
+
           {/* Activity Log Feed */}
           <div className="bg-slate-900/60 border border-slate-800/80 p-6 rounded-2xl backdrop-blur-xl flex flex-col gap-4 flex-1">
             <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest border-b border-slate-800/60 pb-3">

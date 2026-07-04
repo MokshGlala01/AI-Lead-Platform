@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
-import { calculateScore } from '@/lib/scoring';
+import { calculateScore, aiScoreLead } from '@/lib/scoring';
 import { assignCounselor } from '@/lib/assignment';
 import { generateMessage } from '@/lib/ai';
 import { sendEmail } from '@/lib/email';
@@ -14,7 +14,8 @@ export function mapLeadKeys(lead: any) {
     websiteVisits: lead.website_visits,
     counselorId: lead.counselor_id,
     createdAt: lead.created_at,
-    updatedAt: lead.updated_at
+    updatedAt: lead.updated_at,
+    aiRecommendation: lead.ai_recommendation
   };
   if (lead.counselors) {
     mapped.counselor = {
@@ -138,13 +139,16 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Please enter a valid 10-digit phone number.' }, { status: 400 });
     }
 
-    // Calculate score & category
-    const { score, category } = calculateScore({
-      courseInterest: course_interest,
+    // Calculate AI score, category & recommendation
+    const { score, category, recommendation } = await aiScoreLead({
+      name,
+      course_interest,
       qualification,
       age,
-      downloadedBrochure: downloaded_brochure,
-      websiteVisits: website_visits
+      city,
+      downloaded_brochure,
+      website_visits,
+      notes
     });
 
     // Create lead record in Supabase
@@ -163,6 +167,7 @@ export async function POST(req: NextRequest) {
         website_visits: website_visits ? parseInt(website_visits) : 1,
         score,
         category,
+        ai_recommendation: recommendation,
         status: 'New',
         notes: notes || null
       })
@@ -186,7 +191,7 @@ export async function POST(req: NextRequest) {
       .insert({
         lead_id: leadRecord.id,
         activity_type: 'status_change',
-        description: `Student registered via ${source}. Initial score computed as ${score} (${category}).`
+        description: `Student registered via ${source}. AI Score: ${score} (${category}). Analysis: ${recommendation}`
       });
 
     // Run round-robin assignment if lead is Hot (score >= 80)

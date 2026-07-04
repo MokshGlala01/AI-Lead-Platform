@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
-import { calculateScore } from '@/lib/scoring';
+import { calculateScore, aiScoreLead } from '@/lib/scoring';
 
 // POST /api/leads/[id]/rescore - Force lead score recalculation
 export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
@@ -19,19 +19,26 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
       return NextResponse.json({ error: 'Lead not found.' }, { status: 404 });
     }
 
-    // Recalculate score & category
-    const { score, category } = calculateScore({
-      courseInterest: lead.course_interest,
+    // Recalculate score, category & recommendation
+    const { score, category, recommendation } = await aiScoreLead({
+      name: lead.name,
+      course_interest: lead.course_interest,
       qualification: lead.qualification,
       age: lead.age,
-      downloadedBrochure: lead.downloaded_brochure,
-      websiteVisits: lead.website_visits
+      city: lead.city,
+      downloaded_brochure: lead.downloaded_brochure,
+      website_visits: lead.website_visits,
+      notes: lead.notes
     });
 
     // Update lead record
     const { data: updated, error: updateError } = await supabaseAdmin
       .from('leads')
-      .update({ score, category })
+      .update({ 
+        score, 
+        category,
+        ai_recommendation: recommendation
+      })
       .eq('id', id)
       .select()
       .single();
@@ -47,7 +54,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
       .insert({
         lead_id: id,
         activity_type: 'status_change',
-        description: `Lead score recalculated: score updated to ${score} (${category}).`
+        description: `Lead score recalculated: score updated to ${score} (${category}). AI Analysis: ${recommendation}`
       });
 
     return NextResponse.json({ score: updated.score, category: updated.category });
